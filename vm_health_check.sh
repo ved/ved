@@ -5,6 +5,9 @@
 # If all three metrics are less than 60% utilized: HEALTHY
 # If any metric is 60% or more utilized: UNHEALTHY
 
+# Threshold for health check (percentage)
+THRESHOLD=60
+
 # Function to get CPU utilization percentage
 get_cpu_usage() {
     # Get CPU usage using top command (idle percentage)
@@ -33,7 +36,7 @@ main() {
     local explain_mode=false
     
     # Check if "explain" argument is passed
-    if [ "$1" == "explain" ]; then
+    if [ "$1" = "explain" ]; then
         explain_mode=true
     fi
     
@@ -43,9 +46,9 @@ main() {
     disk_usage=$(get_disk_usage)
     
     # Determine health status
-    # HEALTHY if all three are less than 60%
-    # UNHEALTHY if any one is 60% or more
-    if [ $cpu_usage -lt 60 ] && [ $memory_usage -lt 60 ] && [ $disk_usage -lt 60 ]; then
+    # HEALTHY if all three are less than THRESHOLD
+    # UNHEALTHY if any one is at or above THRESHOLD
+    if [ "$cpu_usage" -lt "$THRESHOLD" ] && [ "$memory_usage" -lt "$THRESHOLD" ] && [ "$disk_usage" -lt "$THRESHOLD" ]; then
         health_status="HEALTHY"
     else
         health_status="UNHEALTHY"
@@ -58,31 +61,31 @@ main() {
         echo "Detailed Analysis:"
         echo "=================="
         echo "CPU Usage: ${cpu_usage}%"
-        if [ $cpu_usage -lt 60 ]; then
-            echo "  Status: OK (below 60% threshold)"
+        if [ "$cpu_usage" -lt "$THRESHOLD" ]; then
+            echo "  Status: OK (below ${THRESHOLD}% threshold)"
         else
-            echo "  Status: WARNING (at or above 60% threshold)"
+            echo "  Status: WARNING (at or above ${THRESHOLD}% threshold)"
         fi
         echo ""
         echo "Memory Usage: ${memory_usage}%"
-        if [ $memory_usage -lt 60 ]; then
-            echo "  Status: OK (below 60% threshold)"
+        if [ "$memory_usage" -lt "$THRESHOLD" ]; then
+            echo "  Status: OK (below ${THRESHOLD}% threshold)"
         else
-            echo "  Status: WARNING (at or above 60% threshold)"
+            echo "  Status: WARNING (at or above ${THRESHOLD}% threshold)"
         fi
         echo ""
         echo "Disk Usage: ${disk_usage}%"
-        if [ $disk_usage -lt 60 ]; then
-            echo "  Status: OK (below 60% threshold)"
+        if [ "$disk_usage" -lt "$THRESHOLD" ]; then
+            echo "  Status: OK (below ${THRESHOLD}% threshold)"
         else
-            echo "  Status: WARNING (at or above 60% threshold)"
+            echo "  Status: WARNING (at or above ${THRESHOLD}% threshold)"
         fi
         echo ""
         echo "Overall: VM is $health_status because "
-        if [ "$health_status" == "HEALTHY" ]; then
-            echo "all metrics (CPU, Memory, Disk) are below 60% utilization."
+        if [ "$health_status" = "HEALTHY" ]; then
+            echo "all metrics (CPU, Memory, Disk) are below ${THRESHOLD}% utilization."
         else
-            echo "one or more metrics (CPU, Memory, Disk) are at or above 60% utilization."
+            echo "one or more metrics (CPU, Memory, Disk) are at or above ${THRESHOLD}% utilization."
         fi
     else
         echo "$health_status"
